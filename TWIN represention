@@ -1,0 +1,9 @@
+# TWIN represention
+
+twin = DigitalTwin("Patient_01")
+
+twin.update(0, 0.35)
+twin.update(6, 0.48)
+twin.update(12, 0.72)
+
+twin.plot_progression()
