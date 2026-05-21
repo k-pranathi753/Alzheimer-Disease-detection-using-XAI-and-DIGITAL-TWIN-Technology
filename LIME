@@ -1,0 +1,38 @@
+from lime import lime_image
+from skimage.segmentation import mark_boundaries
+import numpy as np
+import matplotlib.pyplot as plt
+
+model.eval()
+explainer = lime_image.LimeImageExplainer()
+
+# Convert image back to numpy (undo normalization for visualization)
+image_np = images[0].cpu().permute(1, 2, 0).numpy()
+
+# LIME expects values between 0–1
+image_np = (image_np - image_np.min()) / (image_np.max() - image_np.min())
+
+def batch_predict(images_np):
+    model.eval()
+    images_tensor = torch.tensor(images_np).permute(0, 3, 1, 2).float().to(device)
+    outputs = model(images_tensor)
+    return torch.softmax(outputs, dim=1).detach().cpu().numpy()
+
+explanation = explainer.explain_instance(
+    image_np,
+    batch_predict,
+    top_labels=4,
+    num_samples=500   # reduced for faster execution
+)
+
+temp, mask = explanation.get_image_and_mask(
+    explanation.top_labels[0],
+    positive_only=True,
+    num_features=5,
+    hide_rest=False
+)
+
+plt.imshow(mark_boundaries(temp, mask))
+plt.title("LIME Explanation")
+plt.axis("off")
+plt.show()
