@@ -163,3 +163,41 @@ def replace_relu(model):
 
 replace_relu(model)
 model.eval()
+import shap
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+
+# Example clinical features
+X = np.random.rand(100, 5)  # hippocampus volume, MMSE, age etc
+y = np.random.randint(0, 2, 100)
+
+model_tab = RandomForestClassifier()
+model_tab.fit(X, y)
+
+explainer = shap.TreeExplainer(model_tab)
+shap_values = explainer.shap_values(X)
+
+shap.summary_plot(shap_values, X)
+class DigitalTwin:
+    def __init__(self, patient_id):
+        self.patient_id = patient_id
+        self.time_points = []
+        self.risk_scores = []
+
+    def update(self, time, prediction_score):
+        self.time_points.append(time)
+        self.risk_scores.append(prediction_score)
+
+    def plot_progression(self):
+        plt.plot(self.time_points, self.risk_scores)
+        plt.xlabel("Time")
+        plt.ylabel("AD Risk Score")
+        plt.title("Digital Twin Risk Progression")
+        plt.show()
+twin = DigitalTwin("Patient_01")
+
+twin.update(0, 0.35)
+twin.update(6, 0.48)
+twin.update(12, 0.72)
+
+twin.plot_progression()
